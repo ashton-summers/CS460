@@ -12,22 +12,6 @@ int main()
     {
         children[i] = fork();
         
-        if(i == 0)
-        {
-            open("/dev/ttyS0", O_RDONLY);
-            open("/dev/ttyS0", O_WRONLY);
-        }
-        else if(i == 1)
-        {
-             open("/dev/ttyS1", O_RDONLY);
-            open("/dev/ttyS1", O_WRONLY);
-        }
-        else if(i == 2)
-        {
-            open("/dev/tty0", O_RDONLY);
-            open("/dev/tty0", O_WRONLY);
-        }
-        
         if(!children[i])
         {
             login();
