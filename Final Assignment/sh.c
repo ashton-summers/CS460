@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
     }
 }
 
+/*
+ * Looks for trivial commands to execute before anything else.
+ * Otherwise, it forks a process and preps for non-trivial commands.
+ * @param char *input: The command to execute.
+ * @returns: -1 for failure and 0 for success.
+*/
 int preExecute(char *input)
 {
     int pid, status = 0;
@@ -70,6 +76,7 @@ int preExecute(char *input)
         if(pid < 0)
         {
             printf("Failed to fork a child process\n", 0);
+            return -1;
         }
         
         // Parent process.
@@ -96,12 +103,16 @@ int preExecute(char *input)
         }
     }
     
+    return 0;
 }
 
 /*
  * Removes redirection symbols from the input string.
  * They are not needed for execution of a command once
  * redirection has been handled.
+ * @param char *input: The string to remove symbols from
+ * @returns: The new string without IO symbols
+ * e.g cat f >> file would return cat f file
 */
 char* removeIOSymbols(char *input)
 {
@@ -134,33 +145,34 @@ char* removeIOSymbols(char *input)
 }
 
 /*
- * Executes the specified input
+ * Executes the specified input after checking for IO redirection
+ * @param char *cmd: The command to execute
 */
-int execute(char *input)
+void execute(char *cmd)
 {
-    char temp[256];
     int ioType;
     
     // Do we have redirection?
-    ioType = hasRedirection(input);
+    ioType = hasRedirection(cmd);
     
     // IO redirection found.
     if(ioType > 0)
     {
         // Remove the IO symbols from the string.
         // We lo longer need them after output is redirected.
-        input = removeIOSymbols(input);
+        cmd = removeIOSymbols(cmd);
         redirect(file, ioType);
     }
     
     // Execute the input.
-    exec(input);  
+    exec(cmd);  
 }
 
 
 /*
  * Executed when we have found a pipe in the input.
  * Breaks apart input and executes pipe operations accordingly.
+ * @param char *input: The input string.
 */
 int doPipe(char *input)
 {
@@ -210,15 +222,14 @@ int doPipe(char *input)
         close(1);
         dup2(pd[1], 1);
         close(pd[0]);
-  
         execute(head);
-   
     }
 }
 
 /*
  * Searches for '|' char to see if a pipe is found.
- * Returns 0 for not found and 1 for found.
+ * @param char *input: The input string to iterate over.
+ * @returns: 0 for not found and 1 for found.
 */
 int hasPipe(char *input)
 {
@@ -237,9 +248,10 @@ int hasPipe(char *input)
 }
 
 /*
- * Searches for IO redirection chars
+ * Searches for IO redirection chars in input string
  * >> for append, < for read, > for write.
- * Returns: 1 for >>, 2 for > and 3 for <, -1 for does not exist.
+ * @param char *input: The input string
+ * @returns: 1 for >>, 2 for > and 3 for <, -1 for does not exist.
 */
 int hasRedirection(char *input)
 {
@@ -255,13 +267,13 @@ int hasRedirection(char *input)
                 retVal = 1;
                 break;
             }
-            else
+            else // Write io redirection
             {
                 retVal = 2;
                 break;
             }
         }
-        else if(*temp == '<')
+        else if(*temp == '<') // stdin io redirection.
         {
             retVal = 3;
             break;
@@ -269,6 +281,7 @@ int hasRedirection(char *input)
         
     }
     
+    // If IO redirection was found, search for filename.
     if(retVal > 0)
     {
         getFileName(input);
@@ -277,6 +290,12 @@ int hasRedirection(char *input)
     return retVal;
 }
 
+/*
+ * Finds the filename in a string to use for IO redirection.
+ * e.g. cat file > fileToFind: fileToFind would be the found filename
+ * @param char *input: The input string to iterate over.
+ * @returns: 0 for success.
+*/
 int getFileName(char *input)
 {
     char tempInput[256];
@@ -297,8 +316,7 @@ int getFileName(char *input)
             // If next char is '>' then move past it
             if(*(temp + 1) == '>') 
             {
-                temp++;
-                temp++;
+                temp += 2;
             }
             
             temp++;
@@ -306,6 +324,7 @@ int getFileName(char *input)
             // Grab the file name.
             tok = strtok(temp, " ");
             
+            // Break out of loop; filename found.
             break;
         }
     }
@@ -313,33 +332,38 @@ int getFileName(char *input)
     // Copy file name to global file variable.
     strcpy(file, tok);
     
-    return 1; 
+    return 0; 
 }
 
 /*
  * Given an int to the type of redirection to do,
- * and a file name, the function redirects IO accordingly. 
- * Returns 1 for success and 0 for false.
+ * and a file name, the function redirects IO accordingly.
+ * @param char *file: The name of the file to open. 
+ * @param int redirectionType: Type of IO redirection to do.
+ * @returns: 0 for success.
 */
-int redirect(char *file, int type)
+int redirect(char *file, int redirectionType)
 {
-    switch(type)
+    switch(redirectionType)
     {
+        // Append IO redirection
         case 1:
             close(1);
             open(file, O_APPEND | O_WRONLY | O_CREAT);
             break;
+        // Write IO redirection.
         case 2:
             close(1);
             open(file, O_WRONLY | O_CREAT);
             break;
+        // Read from stdin IO redirection.
         case 3:
             close(0);
             open(file, O_RDONLY);
             break;
     }
     
-    return 1;
+    return 0;
 }
 
 

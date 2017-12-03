@@ -21,9 +21,11 @@ int main(int argc, char *argv[])
     }
     else // No file provided.
     {
+        // Dup stdin.
         fd = dup(0);
-        //fd = 0;
         close(0);
+        
+        // Open current tty for read.
         gettty(tty);
         open(tty, O_RDONLY);
         moreFile(fd);
@@ -31,6 +33,12 @@ int main(int argc, char *argv[])
     }
 }
 
+/*
+ * Given a file descriptor, this function displays the contents line by line
+ * or 20 lines at a time if space key is entered.
+ * @param int fd: The file descriptor to run 'more' over.
+ * @returns: -1 for failure.
+*/
 int moreFile(int fd)
 {
     char *line, lines[1024], *begin = lines;
@@ -40,10 +48,10 @@ int moreFile(int fd)
     if(fd < 0)
     {
         printf("Cannot execute more. File does not exist or has not been opened%c\n", 0);
-        return 0;
+        return -1;
     }
     
-    // Display 15 lines to start.
+    // Display 20 lines to start.
     for(i = 0; i < 20; i++)
     {
         line = fgets(buffer, 1024, fd);

@@ -30,8 +30,8 @@ int nk;
 #define EOF -1
 extern char cr;
 
-//void putchar(const char c){ }
 
+// This function is part of the starter MTX code.
 int getc()
 {
    int c, n;
@@ -49,6 +49,7 @@ int getc()
 
 // getline() does NOT show the input chars AND no cooking: 
 // for reditected inputs from a file which may contain '\b' chars
+// This function is part of the starter MTX code.
 
 int getline(char *s)
 {
@@ -69,6 +70,28 @@ int getline(char *s)
   return strlen(s);  // at least 1 because last char=\r or \n
 }
 
+
+/* 
+ * strrchr.c --
+ *
+ *	Source code for the "strrchr" library routine.
+ *
+ * Copyright 1988 Regents of the University of California
+ * Permission to use, copy, modify, and distribute this
+ * software and its documentation for any purpose and without
+ * fee is hereby granted, provided that the above copyright
+ * notice appear in all copies.  The University of California
+ * makes no representations about the suitability of this
+ * software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ */
+
+/*
+ * Returns a pointer to the last occurrence of character in the C string str.
+ * @param char *string: Input string to search through
+ * @param char c: Character to search for.
+ * @returns: A pointer to the last occurrence of character in C string @param string.
+*/
 char * strrchr(char *string, char c)
 {
     register char *result = (char *)0;
@@ -87,10 +110,34 @@ char * strrchr(char *string, char c)
     return result;
 }
 
+
+/* 
+ * strcspn.c --
+ *
+ *	Source code for the "strcspn" library routine.
+ *
+ * Copyright 1988 Regents of the University of California
+ * Permission to use, copy, modify, and distribute this
+ * software and its documentation for any purpose and without
+ * fee is hereby granted, provided that the above copyright
+ * notice appear in all copies.  The University of California
+ * makes no representations about the suitability of this
+ * software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ */
+
+/*
+ * Scans str1 for the first occurrence of any of the characters that are part of str2.
+ * returning the number of characters of str1 read before this first occurrence.
+ * @param char *string: The string to search through
+ * @param char *chars: Chars to search for occurrences of.
+ * @returns: The number of chars of s1 read before occurrence of any char in chars.
+*/
 int strcspn(char *string, char *chars)
 {
-    register char c, *p, *s;
-
+    char c, *p, *s;
+    
+    // Iterate over s (string) until c is 0.
     for (s = string, c = *s; c != 0; s++, c = *s) 
     {
 	    for (p = chars; *p != 0; p++) 
@@ -105,6 +152,28 @@ int strcspn(char *string, char *chars)
 }
 
 
+/* 
+ * strtok.c --
+ *
+ *	Source code for the "strtok" library routine.
+ *
+ * Copyright 1988 Regents of the University of California
+ * Permission to use, copy, modify, and distribute this
+ * software and its documentation for any purpose and without
+ * fee is hereby granted, provided that the above copyright
+ * notice appear in all copies.  The University of California
+ * makes no representations about the suitability of this
+ * software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ */
+
+/* 
+ * Searches a string for delimiting characters and
+ * returns the contents up until that point. 
+ * @param char *s: String to search through
+ * @param char *delim: The delimiting chars
+ * @returns: The contents of the string up until delim chars.
+ */ 
 char * strtok(char *s, const char *delim)  /* delimiting characters */
 {
     static char *lasts;
@@ -123,8 +192,14 @@ char * strtok(char *s, const char *delim)  /* delimiting characters */
     return s;
 }
 
-// Reads from a file either until we hit the end of it or
-// we find a return/newline key. Returns 
+/* 
+ * Reads from a file either until we hit the end of it or
+ * we find a return/newline key. Returns
+ * @param char *dst: The destination pointer
+ * @param int max: Max number of bytes
+ * @param int fd: The file descriptor to read from.
+ * @returns: A pointer to the beginning of the line that was read.
+ */ 
 char * fgets(char *dst, int max, int fd)
 {
 	int count = 0;
@@ -146,8 +221,7 @@ char * fgets(char *dst, int max, int fd)
 	        
 	    if(n == 0)
 	        return 0;
-	    
-	    
+	   
 	    *dst++ = c;
 	    count++; 
 	    
@@ -168,6 +242,8 @@ char * fgets(char *dst, int max, int fd)
 
 /*
  * Converts a string to uppercase.
+ * @param char *str: The string to convert.
+ * @returns: The converted string.
 */
 char *toUpper(char *str)
 {
@@ -230,6 +306,9 @@ int gets(char *s)
   return strlen(s)+1;  // line=CR or \n only return 1
 }
 
+/*
+ * --------------------- MTX SYSCALLS ------------------------
+*/
 
 int getpid()
 {
@@ -590,71 +669,4 @@ int pwd()
   return 0;
 }
 
-
-// nk = eatpat(line, name);
-
-int eatpath(char *line, char *name[ ])  
-{
-  int i, n; char *cp;
-
-  n = 0; 
-  for (i=0; i<16; i++)
-      name[i]=0;
-
-  cp = line;
-  while (*cp != 0){
-       while (*cp == ' ')
-              *cp++ = 0;       
-       if (*cp != 0)
-           name[n++] = cp; 
-       while (*cp != ' ' && *cp != 0)
-	       cp++; 
-       if (*cp != 0)       
-	   *cp = 0;        
-       else
-           break; 
-       cp++;
-  }
-
-  /*
-  for (i=0; i < n; i++){
-      if (name[i]){
-         prints(name[i]); prints("  ");
-      }
-  }
-  prints("\n\r");
-  */
-  return n;
-}
-/*
-int strcasecmp(char *s1, char *s2)
-{
-  char *cp;
-
-  char t1[64], t2[64];
-  strcpy(t1, s1); 
-  strcpy(t2,s2);
-
-  //printf("t1=%s  t2=%s  ", t1, t2);
-
-  cp = t1;
-
-  while(*cp){  // all to lower case
-    if (('A' <= *cp) && (*cp <= 'Z')){
-      *cp = *cp - 'A' + 'a';
-    }
-    cp++;
-  }
-  //printf("t1=%s  ", t1);
-  cp = t2;
-  while(*cp){  // all to upper case
-    if (('A' <= *cp) && (*cp <= 'Z')){
-      *cp = *cp - 'A' + 'a';
-    }
-    cp++;
-  }
-  //printf("t2=%s\n", t1, t2);
-  return strcmp(t1, t2);
-}
-*/
 

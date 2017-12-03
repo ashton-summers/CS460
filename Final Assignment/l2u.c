@@ -54,8 +54,11 @@ int main(int argc, char *argv[])
 /*
  * Converts the contents of the destination file
  * from lowercase to uppercase.
+ * @param: int dstFD: The destination file descriptor
+ * @param: int srcFD: The source file descriptor
+ * @returns: -1 for failure.
 */
-int l2u(int dstFD, int srcFD)
+void l2u(int dstFD, int srcFD)
 {
     char *line;
     char lineToConvert[128];
@@ -65,7 +68,7 @@ int l2u(int dstFD, int srcFD)
     {
         printf("The source file entered does not exist\n", 0);
         printf("Cannot convert from lower to upper\n", 0);
-        return 0;
+        return -1;
     }
     
     n = read(srcFD, buffer, nbytes);
@@ -73,7 +76,8 @@ int l2u(int dstFD, int srcFD)
     while(n > 0)
     {
     
-        // Convert the buffer to upper case.
+        /*Convert buffer to uppercase. 
+          This function is in ucode.c */
         toUpper(buffer);
         
         for(i = 0; i < n; i++)

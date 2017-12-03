@@ -8,10 +8,12 @@ int main()
     
     printf("Ashton's INIT: form a login proc on console\n %c", 0);
     
+    // Fork 3 child processes
     for(i = 0; i < 3; i++)
     {
         children[i] = fork();
         
+        // If child process is executing.
         if(!children[i])
         {
             login();
@@ -22,8 +24,13 @@ int main()
              
 }
 
-int login()
+/*
+ * Executes the login command to the specified
+ * serial port.
+*/
+void login()
 {
+    // Call login from respective child processes.
     if(i == 0)
     {
         exec("login /dev/ttyS0");
@@ -38,7 +45,11 @@ int login()
     }
 }
 
-int parent()
+/*
+ * When a child process dies, this function is called
+ * to fork another login process.
+*/
+void parent()
 {
     int pid, status;
     while(1)
@@ -48,11 +59,13 @@ int parent()
         
         for(i = 0; i < 3; i++)
         {
+            // Check the dead process's pid
             if(pid == children[i])
             {
-                
+                // Fork another child process.
                 children[i] = fork();
                 
+                // Parent process. 
                 if(children[i])
                     continue;
                 else

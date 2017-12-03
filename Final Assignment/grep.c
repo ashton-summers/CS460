@@ -39,6 +39,9 @@ int main(int argc, char *argv[])
 /*
  * Reads through a file and prints lines that contain the 
  * specified pattern
+ * @param int fd: The file descriptor to read from
+ * @param char *pattern: Pattern to look for in file.
+ * @returns: -1 for failure.
 */
 int grepFile(int fd, char *pattern)
 {
@@ -54,7 +57,7 @@ int grepFile(int fd, char *pattern)
     if(fd < 0)
     {
         printf("Cannot grep. Either file does not exist or is not opened\n%c", 0);
-        return 0;
+        return -1;
     }
     
     // Loop until no more lines in the file.
